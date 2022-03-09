@@ -1,0 +1,136 @@
+{
+    "name": "PlayerControls",
+    "maps": [
+        {
+            "name": "World",
+            "id": "8ae7e3f1-aeb2-4085-8523-b159bf99a00c",
+            "actions": [
+                {
+                    "name": "MouseZoom",
+                    "type": "Value",
+                    "id": "25b51209-68c5-40e2-9360-9191ffb5bbe9",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "TriggerZoom",
+                    "type": "Button",
+                    "id": "812a66fe-2bd8-4685-a594-e5eba8ba4f6a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PanMap",
+                    "type": "Value",
+                    "id": "84a2dc69-30f9-470b-9513-1a1c7212cbf7",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "MoveCursor",
+                    "type": "Value",
+                    "id": "61fa3b89-37e2-497a-9edb-264d37788a90",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "SelectButton",
+                    "type": "Button",
+                    "id": "bbbce34f-1dda-41c3-8133-fdb1091aa093",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1f20275c-df1d-4eef-a455-7e261b667e03",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MouseZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e480c1b9-2eb3-4ad3-96ba-6e97d7872d16",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PanMap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "42cfc733-0ef0-4d44-9919-e90f3785b2bb",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MoveCursor",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "52f101a5-d430-4e91-bbcd-7ac1e7b6827a",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectButton",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "GamepadTriggers",
+                    "id": "efd65f34-01ad-4f42-abbc-bbfcbb3f2fd7",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TriggerZoom",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "a49593f7-21a3-47fb-a57d-75024ecac06c",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "Scale(factor=0.01)",
+                    "groups": "",
+                    "action": "TriggerZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "b2630d9c-e5eb-4d02-86fd-4b20327f2b43",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "Scale(factor=0.01)",
+                    "groups": "",
+                    "action": "TriggerZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
