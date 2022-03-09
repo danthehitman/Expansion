@@ -71,6 +71,24 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""WakeupMouse"",
+                    ""type"": ""Button"",
+                    ""id"": ""9e772202-87be-40e8-a58c-cfac06dfd048"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""WakeupController"",
+                    ""type"": ""Button"",
+                    ""id"": ""c8bb7876-0eff-491c-b2fb-4e5a53771667"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -134,7 +152,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""id"": ""a49593f7-21a3-47fb-a57d-75024ecac06c"",
                     ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
-                    ""processors"": ""Scale(factor=0.01)"",
+                    ""processors"": """",
                     ""groups"": """",
                     ""action"": ""TriggerZoom"",
                     ""isComposite"": false,
@@ -145,11 +163,33 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""id"": ""b2630d9c-e5eb-4d02-86fd-4b20327f2b43"",
                     ""path"": ""<Gamepad>/rightTrigger"",
                     ""interactions"": """",
-                    ""processors"": ""Scale(factor=0.01)"",
+                    ""processors"": """",
                     ""groups"": """",
                     ""action"": ""TriggerZoom"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""cce80ebb-e355-4682-83f0-cffdc6d666b7"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WakeupMouse"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4bc73ee0-b0af-465c-9c5d-614066132584"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""WakeupController"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -163,6 +203,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_World_PanMap = m_World.FindAction("PanMap", throwIfNotFound: true);
         m_World_MoveCursor = m_World.FindAction("MoveCursor", throwIfNotFound: true);
         m_World_SelectButton = m_World.FindAction("SelectButton", throwIfNotFound: true);
+        m_World_WakeupMouse = m_World.FindAction("WakeupMouse", throwIfNotFound: true);
+        m_World_WakeupController = m_World.FindAction("WakeupController", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -227,6 +269,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_World_PanMap;
     private readonly InputAction m_World_MoveCursor;
     private readonly InputAction m_World_SelectButton;
+    private readonly InputAction m_World_WakeupMouse;
+    private readonly InputAction m_World_WakeupController;
     public struct WorldActions
     {
         private @PlayerControls m_Wrapper;
@@ -236,6 +280,8 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @PanMap => m_Wrapper.m_World_PanMap;
         public InputAction @MoveCursor => m_Wrapper.m_World_MoveCursor;
         public InputAction @SelectButton => m_Wrapper.m_World_SelectButton;
+        public InputAction @WakeupMouse => m_Wrapper.m_World_WakeupMouse;
+        public InputAction @WakeupController => m_Wrapper.m_World_WakeupController;
         public InputActionMap Get() { return m_Wrapper.m_World; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -260,6 +306,12 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @SelectButton.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnSelectButton;
                 @SelectButton.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnSelectButton;
                 @SelectButton.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnSelectButton;
+                @WakeupMouse.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupMouse;
+                @WakeupMouse.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupMouse;
+                @WakeupMouse.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupMouse;
+                @WakeupController.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupController;
+                @WakeupController.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupController;
+                @WakeupController.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupController;
             }
             m_Wrapper.m_WorldActionsCallbackInterface = instance;
             if (instance != null)
@@ -279,6 +331,12 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @SelectButton.started += instance.OnSelectButton;
                 @SelectButton.performed += instance.OnSelectButton;
                 @SelectButton.canceled += instance.OnSelectButton;
+                @WakeupMouse.started += instance.OnWakeupMouse;
+                @WakeupMouse.performed += instance.OnWakeupMouse;
+                @WakeupMouse.canceled += instance.OnWakeupMouse;
+                @WakeupController.started += instance.OnWakeupController;
+                @WakeupController.performed += instance.OnWakeupController;
+                @WakeupController.canceled += instance.OnWakeupController;
             }
         }
     }
@@ -290,5 +348,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnPanMap(InputAction.CallbackContext context);
         void OnMoveCursor(InputAction.CallbackContext context);
         void OnSelectButton(InputAction.CallbackContext context);
+        void OnWakeupMouse(InputAction.CallbackContext context);
+        void OnWakeupController(InputAction.CallbackContext context);
     }
 }

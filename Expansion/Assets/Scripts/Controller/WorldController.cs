@@ -75,7 +75,7 @@ namespace Assets.Scripts.Controller
 
         private void OnCursorOverWorldCoordinateChanged(int x, int y)
         {
-            Debug.Log("New X and Y coords.");
+            Debug.Log($"New X and Y coords {x}/{y}");
         }
     }
 }

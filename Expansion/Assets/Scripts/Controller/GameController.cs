@@ -34,14 +34,14 @@ namespace Assets.Scripts.Controller
         {
             //TODO: Create an interface for non mono game components and add them all
             //to a list and call all of these methods in a loop for each of them.
-            playerControls.Enable();
-            InputController.OnEnable();
+            playerControls?.Enable();
+            InputController?.OnEnable();
         }
 
         public void OnDisable()
         {
             playerControls?.Disable();
-            InputController.OnDisable();
+            InputController?.OnDisable();
         }
 
         void Start()
@@ -50,7 +50,7 @@ namespace Assets.Scripts.Controller
 
 
             WorldController?.Start();
-            InputController.Start();
+            InputController?.Start();
         }
 
         void Update()

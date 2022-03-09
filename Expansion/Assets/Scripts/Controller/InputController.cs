@@ -6,6 +6,11 @@ using static UnityEngine.InputSystem.InputAction;
 
 namespace Assets.Scripts.Controller
 {
+    public enum InputType
+    {
+        Gamepad,
+        Mouse,
+    }
 
     public class InputController
     {
@@ -16,8 +21,8 @@ namespace Assets.Scripts.Controller
         private float panningThreshold = .015f;
         private Vector3 panningMouseStart = Vector3.zero;
         private Mouse virtualMouse;
-        private PlayerInput playerInput;
         private Transform cursorTransform;
+        private InputType inputType;
 
         protected Action<int, int> OnCursorOverWorldCoordinateChanged;
         protected PlayerControls PlayerControls;
@@ -36,6 +41,7 @@ namespace Assets.Scripts.Controller
 
         public void OnEnable()
         {
+            inputType = InputType.Mouse;
 
             if (virtualMouse == null)
             {
@@ -46,23 +52,23 @@ namespace Assets.Scripts.Controller
                 InputSystem.AddDevice(virtualMouse);
             }
 
-            //InputUser.PerformPairingWithDevice(virtualMouse, playerInput.user);
-
             if (cursorTransform != null)
             {
                 Vector2 position = cursorTransform.position;
                 InputState.Change(virtualMouse.position, position);
             }
 
-            InputSystem.onAfterUpdate += UpdateGamepadCursor;
-            InputSystem.onAfterUpdate += HandleContinuousUpdates;
+            InputSystem.onAfterUpdate += HandleOnAfterUpdate;
+            PlayerControls.World.WakeupController.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
+            PlayerControls.World.WakeupMouse.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
         }
 
         public void OnDisable()
         {
             InputSystem.RemoveDevice(virtualMouse);
-            InputSystem.onAfterUpdate -= UpdateGamepadCursor;
-            InputSystem.onAfterUpdate -= HandleContinuousUpdates;
+            InputSystem.onAfterUpdate -= HandleOnAfterUpdate;
+            PlayerControls.World.WakeupController.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
+            PlayerControls.World.WakeupMouse.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
         }
 
 
@@ -78,12 +84,31 @@ namespace Assets.Scripts.Controller
             //HandleContinuousUpdates();
         }
 
-        private void HandlePanMap(CallbackContext context)
+        private void SetActiveInputType(InputType inputType)
         {
-
+            //TODO: Cant figure out why it takes two controller button pushes to make the switch.
+            //The first time you switch from mouse to controller this method gets called twice,
+            //first for gamepad switch, and then for mouse switch.
+            if (this.inputType != inputType && inputType == InputType.Mouse)
+            {
+                cursorTransform.gameObject.SetActive(false);
+            }
+            if (this.inputType != inputType && inputType == InputType.Gamepad)
+            {
+                cursorTransform.gameObject.SetActive(true);
+            }
+            Debug.Log($"ExistingInputType: {this.inputType} NewInputType: {inputType}");
+            this.inputType = inputType;
         }
 
-        private void UpdateGamepadCursor()
+        private void HandleOnAfterUpdate()
+        {
+            if (inputType == InputType.Gamepad) HandleGamepadMouse();
+            if (inputType == InputType.Mouse) HandleMouseInput();
+            HandlZoomInput();
+        }
+
+        private void HandleGamepadMouse()
         {
             var speed = 1000;
             if (virtualMouse != null && Gamepad.current != null)
@@ -104,7 +129,16 @@ namespace Assets.Scripts.Controller
                 mouseState.WithButton(MouseButton.Left, PlayerControls.World.SelectButton.IsPressed());
                 InputState.Change(virtualMouse, mouseState);
 
+                UpdateMouseWorldTilePosition(Camera.main.ScreenToWorldPoint(new Vector3(newPosition.x, newPosition.y, 0)), () => { return newPosition; });
+
                 AnchorCursor(newPosition);
+            }
+
+            var panMapVector = PlayerControls.World.PanMap.ReadValue<Vector2>();
+            if (PlayerControls.World.PanMap.IsPressed())
+            {
+                var moveSpeed = 10;
+                Camera.main.transform.Translate(moveSpeed * Time.deltaTime * panMapVector);
             }
         }
 
@@ -114,10 +148,10 @@ namespace Assets.Scripts.Controller
         }
 
 
-        private void HandleContinuousUpdates()
+        private void HandleMouseInput()
         {
-            //var mouseCurrentPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            var mouseCurrentPosition = Camera.main.ScreenToWorldPoint(new Vector3(Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y, 0));
+            var currentMouseVector = Mouse.current.position.ReadValue();
+            var mouseCurrentPosition = Camera.main.ScreenToWorldPoint(new Vector3(currentMouseVector.x, currentMouseVector.y, 0));
 
             //Check if the screen is being dragged.
             if (Vector3.Distance(panningMouseStart, mouseCurrentPosition) > panningThreshold * Camera.main.orthographicSize)
@@ -133,13 +167,6 @@ namespace Assets.Scripts.Controller
                 Camera.main.transform.Translate(diff);
             }
 
-            var panMapVector = PlayerControls.World.PanMap.ReadValue<Vector2>();
-            if (PlayerControls.World.PanMap.IsPressed())
-            {
-                var moveSpeed = 10;
-                Camera.main.transform.Translate(moveSpeed * Time.deltaTime * panMapVector);
-            }
-
             //If the left mouse button isnt down then we arent panning.
             //if (!Input.GetMouseButton(0))
             if (Mouse.current.leftButton.isPressed)
@@ -147,8 +174,12 @@ namespace Assets.Scripts.Controller
                 isPanning = false;
             }
 
-            UpdateMouseWorldTilePosition(mouseCurrentPosition);
+            UpdateMouseWorldTilePosition(mouseCurrentPosition, () => { return Mouse.current.position.ReadValue(); });
 
+        }
+
+        private void HandlZoomInput()
+        {
             //Zoom in/out
             //Handled here instead of in a callback because we want continuous press in less code.
 
@@ -168,34 +199,26 @@ namespace Assets.Scripts.Controller
 
             Camera.main.orthographicSize -= Camera.main.orthographicSize * scroll * 2;
             Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize, 3f, 200f);
-
         }
 
-        private void UpdateMouseWorldTilePosition(Vector3 mouseCurrentPosition)
-        {
-
-            CompareCurrentWithLastCoordsAndNotify(currentXFloor, currentYFloor);
-
-            //MouseLastPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            mouseLastPosition = Camera.main.ScreenToWorldPoint(new Vector3(Mouse.current.position.ReadValue().x, Mouse.current.position.ReadValue().y, 0));
-
-            lastWorldX = Mathf.FloorToInt(mouseLastPosition.x + 0.5f);
-            lastWorldY = Mathf.FloorToInt(mouseLastPosition.y + 0.5f);
-        }
-
-        private void CompareCurrentWithLastCoordsAndNotify(Vector3 mouseCurrentPosition)
+        private void UpdateMouseWorldTilePosition(Vector3 mouseCurrentPosition, Func<Vector2> getMouseCurrentPosition)
         {
             int currentXFloor = Mathf.FloorToInt(mouseCurrentPosition.x + 0.5f);
             int currentYFloor = Mathf.FloorToInt(mouseCurrentPosition.y + 0.5f);
-
             if (
-                   (lastWorldX != currentX || lastWorldY != currentY)
-                   && OnCursorOverWorldCoordinateChanged != null
-               )
+                (lastWorldX != currentXFloor || lastWorldY != currentYFloor)
+                && OnCursorOverWorldCoordinateChanged != null
+            )
             {
-                OnCursorOverWorldCoordinateChanged(currentX, currentY);
+                OnCursorOverWorldCoordinateChanged(currentXFloor, currentYFloor);
             }
 
+            //Even though we just got the value, if we dont get it again here the screen gets the jitters.
+            var currentMouseVector = getMouseCurrentPosition();
+            mouseLastPosition = Camera.main.ScreenToWorldPoint(new Vector3(currentMouseVector.x, currentMouseVector.y, 0));
+
+            lastWorldX = Mathf.FloorToInt(mouseLastPosition.x + 0.5f);
+            lastWorldY = Mathf.FloorToInt(mouseLastPosition.y + 0.5f);
         }
     }
 

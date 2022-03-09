@@ -49,6 +49,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "WakeupMouse",
+                    "type": "Button",
+                    "id": "9e772202-87be-40e8-a58c-cfac06dfd048",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "WakeupController",
+                    "type": "Button",
+                    "id": "c8bb7876-0eff-491c-b2fb-4e5a53771667",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -112,7 +130,7 @@
                     "id": "a49593f7-21a3-47fb-a57d-75024ecac06c",
                     "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
-                    "processors": "Scale(factor=0.01)",
+                    "processors": "",
                     "groups": "",
                     "action": "TriggerZoom",
                     "isComposite": false,
@@ -123,11 +141,33 @@
                     "id": "b2630d9c-e5eb-4d02-86fd-4b20327f2b43",
                     "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
-                    "processors": "Scale(factor=0.01)",
+                    "processors": "",
                     "groups": "",
                     "action": "TriggerZoom",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "cce80ebb-e355-4682-83f0-cffdc6d666b7",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WakeupMouse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4bc73ee0-b0af-465c-9c5d-614066132584",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WakeupController",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
