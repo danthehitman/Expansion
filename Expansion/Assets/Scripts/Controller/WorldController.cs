@@ -16,22 +16,27 @@ namespace Assets.Scripts.Controller
         //Private Fields
         private World world;
         private WorldTileView[,] worldTileViews;
+        private HighlightBorderView borderView;
         private System.Random rng;
 
         private readonly Transform GameTransform;
         private InputController InputController;
 
-        public WorldController(Transform gameTransform, InputController inputController)
+        public WorldController(Transform gameTransform, InputController inputController, HighlightBorderView borderView)
         {
+            this.borderView = borderView;
+            //TODO: Make settileviewasworldchild take a view interface that it can use to get the transform.
+            borderView.BorderGameObject.transform.SetParent(gameTransform);
 
             GameTransform = gameTransform;
             InputController = inputController;
             inputController.RegisterOnCursorOverWorldCoordinateChangedCallback(OnCursorOverWorldCoordinateChanged);
         }
 
-        // Start is called before the first frame update
         public void Start()
         {
+            borderView.Start();
+
             Instance = this;
 
             rng = new System.Random(Key);
@@ -54,10 +59,9 @@ namespace Assets.Scripts.Controller
             }
         }
 
-        // Update is called once per frame
         public void Update()
         {
-
+            borderView.Update();
         }
 
         private WorldTileView CreateWorldTileView(WorldTile tileArg)
@@ -75,7 +79,7 @@ namespace Assets.Scripts.Controller
 
         private void OnCursorOverWorldCoordinateChanged(int x, int y)
         {
-            Debug.Log($"New X and Y coords {x}/{y}");
+            borderView.SetWorldCoordinates(x, y);
         }
     }
 }

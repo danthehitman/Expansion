@@ -209,6 +209,7 @@ GameObject:
   - component: {fileID: 764865478}
   - component: {fileID: 764865480}
   - component: {fileID: 764865479}
+  - component: {fileID: 764865481}
   m_Layer: 5
   m_Name: Cursor
   m_TagString: Untagged
@@ -273,6 +274,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 764865477}
   m_CullTransparentMesh: 1
+--- !u!95 &764865481
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 764865477}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e580e9842003fb24e84af4dfc2319aee, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &808930254
 GameObject:
   m_ObjectHideFlags: 0

@@ -26,7 +26,7 @@ namespace Assets.Scripts.Controller
             //Initialize game
             playerControls = new PlayerControls();
             InputController = new InputController(cursorView.CursorSprite.transform, playerControls);
-            WorldController = new WorldController(transform, InputController);
+            WorldController = new WorldController(transform, InputController, new HighlightBorderView());
 
         }
 
@@ -46,9 +46,6 @@ namespace Assets.Scripts.Controller
 
         void Start()
         {
-
-
-
             WorldController?.Start();
             InputController?.Start();
         }
