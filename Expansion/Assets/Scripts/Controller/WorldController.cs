@@ -8,8 +8,6 @@ namespace Assets.Scripts.Controller
 {
     public class WorldController
     {
-        public static WorldController Instance;
-
         //Editor Fields
         public int Key = 1;
 
@@ -36,8 +34,6 @@ namespace Assets.Scripts.Controller
         public void Start()
         {
             borderView.Start();
-
-            Instance = this;
 
             rng = new System.Random(Key);
 
