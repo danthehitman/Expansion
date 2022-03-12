@@ -2,11 +2,11 @@
 
 namespace Assets.Scripts.World.Model.Tile
 {
-    public class TerrainInfo
+    public class TileTerrainInfo
     {
         public BiomeType BiomeType { get; set; }
 
-        public TerrainInfo(BiomeType biomeType)
+        public TileTerrainInfo(BiomeType biomeType)
         {
             BiomeType = biomeType;
         }

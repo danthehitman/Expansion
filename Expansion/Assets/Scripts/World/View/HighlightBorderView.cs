@@ -1,9 +1,10 @@
-﻿using Assets.Scripts.Common.Manager;
+﻿using Assets.Scripts.Common;
+using Assets.Scripts.Common.Manager;
 using UnityEngine;
 
 namespace Assets.Scripts.World.View
 {
-    public class HighlightBorderView
+    public class HighlightBorderView : ILifecycleEventAware
     {
         public GameObject BorderGameObject { get; set; }
         private Sprite[] borderSprites;
@@ -29,7 +30,19 @@ namespace Assets.Scripts.World.View
             BorderGameObject.name = "TileBorderHighlight";
         }
 
+        public void Awake()
+        {
+        }
+
         public void Start()
+        {
+        }
+
+        public void OnEnable()
+        {
+        }
+
+        public void OnDisable()
         {
         }
 
@@ -42,6 +55,10 @@ namespace Assets.Scripts.World.View
                 borderSpriteRenderer.sprite = borderSprites[lastFrame];
                 lastFrameDelta = 0;
             }
+        }
+
+        public void OnDestroy()
+        {
         }
 
         public void SetWorldCoordinates(int x, int y)

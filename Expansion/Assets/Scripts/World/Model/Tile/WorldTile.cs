@@ -17,7 +17,7 @@ namespace Assets.Scripts.World.Model.Tile
         }
 
 
-        public TerrainInfo TerrainInfo { get; set; }
+        public TileTerrainInfo TerrainInfo { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
 

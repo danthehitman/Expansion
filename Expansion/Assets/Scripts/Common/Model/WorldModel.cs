@@ -25,6 +25,9 @@ namespace Assets.Scripts.World.Model
 
         public WorldTile[,] WorldTiles { get; set; }
 
+        public int ActiveWorldX { get; set; }
+        public int ActiveWorldY { get; set; }
+
         public int Width => width;
 
         public int Height => height;

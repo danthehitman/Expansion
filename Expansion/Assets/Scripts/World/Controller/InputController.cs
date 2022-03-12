@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Assets.Scripts.Common;
+using Assets.Scripts.World.View;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
@@ -12,8 +14,10 @@ namespace Assets.Scripts.World.Controller
         Mouse,
     }
 
-    public class InputController
+    public class InputController : ILifecycleEventAware
     {
+        private const float DOUBLE_CLICK_INTERVAL = 0.25f;
+        private PlayerControls playerControls;
         private Vector3 mouseLastPosition;
         private int lastWorldX;
         private int lastWorldY;
@@ -23,14 +27,18 @@ namespace Assets.Scripts.World.Controller
         private Mouse virtualMouse;
         private Transform cursorTransform;
         private InputType inputType;
+        private double? leftButtonDownStart = null;
+
 
         protected Action<int, int> OnCursorOverWorldCoordinateChanged;
-        protected PlayerControls PlayerControls;
+        protected Action OnDoubleClickWorldCoordinate;
 
-        public InputController(Transform cursorTransform, PlayerControls playerControls)
+
+        public InputController(Transform uiTransform, PlayerControls playerControls)
         {
-            this.cursorTransform = cursorTransform;
-            PlayerControls = playerControls;
+            var cursorView = new CursorView(uiTransform);
+            cursorTransform = cursorView.GameObject.transform;
+            this.playerControls = playerControls;
         }
 
         public void RegisterOnCursorOverWorldCoordinateChangedCallback(Action<int, int> callback)
@@ -38,6 +46,24 @@ namespace Assets.Scripts.World.Controller
 
         public void UnregisterOnCursorOverWorldCoordinateChangedCallback(Action<int, int> callback)
             => OnCursorOverWorldCoordinateChanged -= callback;
+
+        public void RegisterOnDoubleClickWorldCoordinateCallback(Action callback)
+            => OnDoubleClickWorldCoordinate += callback;
+
+        public void UnregisterOnDoubleClickWorldCoordinateCallback(Action callback)
+            => OnDoubleClickWorldCoordinate -= callback;
+
+
+        public void Awake()
+        {
+        }
+
+
+        // Use this for initialization
+        public void Start()
+        {
+
+        }
 
         public void OnEnable()
         {
@@ -59,29 +85,29 @@ namespace Assets.Scripts.World.Controller
             }
 
             InputSystem.onAfterUpdate += HandleOnAfterUpdate;
-            PlayerControls.World.WakeupController.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
-            PlayerControls.World.WakeupMouse.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
+            playerControls.World.WakeupController.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
+            playerControls.World.WakeupMouse.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
+            playerControls.World.MouseLeftButtonClick.started += HandleOnMouseLeftButtonClick;
+            playerControls.World.MouseLeftButtonClick.canceled += HandleOnMouseLeftButtonClick;
         }
 
         public void OnDisable()
         {
             InputSystem.RemoveDevice(virtualMouse);
             InputSystem.onAfterUpdate -= HandleOnAfterUpdate;
-            PlayerControls.World.WakeupController.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
-            PlayerControls.World.WakeupMouse.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
-        }
-
-
-        // Use this for initialization
-        public void Start()
-        {
-
+            playerControls.World.WakeupController.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
+            playerControls.World.WakeupMouse.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
+            playerControls.World.MouseLeftButtonClick.started -= HandleOnMouseLeftButtonClick;
+            playerControls.World.MouseLeftButtonClick.canceled -= HandleOnMouseLeftButtonClick;
         }
 
         // Update is called once per frame
         public void Update()
         {
-            //HandleContinuousUpdates();
+        }
+
+        public void OnDestroy()
+        {
         }
 
         private void SetActiveInputType(InputType inputType)
@@ -101,6 +127,30 @@ namespace Assets.Scripts.World.Controller
             this.inputType = inputType;
         }
 
+        private void HandleOnMouseLeftButtonClick(CallbackContext ctx)
+        {
+            Debug.Log($"Started: {ctx.started} Canceled: {ctx.canceled} Performed: {ctx.performed}");
+            Debug.Log($"Time: {ctx.time} StartTime: {ctx.startTime} Duration: {ctx.duration}");
+            if (ctx.started)
+            {
+                if (leftButtonDownStart != null)
+                {
+                    if (ctx.time - leftButtonDownStart < DOUBLE_CLICK_INTERVAL)
+                    {
+                        OnDoubleClickWorldCoordinate();
+                    }
+                    leftButtonDownStart = ctx.startTime;
+                }
+                else
+                {
+                    leftButtonDownStart = ctx.startTime;
+                }
+            }
+            else if (ctx.canceled)
+            {
+            }
+        }
+
         private void HandleOnAfterUpdate()
         {
             if (inputType == InputType.Gamepad) HandleGamepadMouse();
@@ -113,7 +163,7 @@ namespace Assets.Scripts.World.Controller
             var speed = 1000;
             if (virtualMouse != null && Gamepad.current != null)
             {
-                Vector2 stickValue = PlayerControls.World.MoveCursor.ReadValue<Vector2>();
+                Vector2 stickValue = playerControls.World.MoveCursor.ReadValue<Vector2>();
                 stickValue *= speed * Time.deltaTime;
                 Vector2 currentPosition = virtualMouse.position.ReadValue();
                 Vector2 newPosition = currentPosition + stickValue;
@@ -126,7 +176,7 @@ namespace Assets.Scripts.World.Controller
 
                 //TODO: This probably needs to track the previous state and make sure it doesnt already line up with the button press.
                 virtualMouse.CopyState<MouseState>(out var mouseState);
-                mouseState.WithButton(MouseButton.Left, PlayerControls.World.SelectButton.IsPressed());
+                mouseState.WithButton(MouseButton.Left, playerControls.World.SelectButton.IsPressed());
                 InputState.Change(virtualMouse, mouseState);
 
                 UpdateMouseWorldTilePosition(Camera.main.ScreenToWorldPoint(new Vector3(newPosition.x, newPosition.y, 0)), () => { return newPosition; });
@@ -134,8 +184,8 @@ namespace Assets.Scripts.World.Controller
                 AnchorCursor(newPosition);
             }
 
-            var panMapVector = PlayerControls.World.PanMap.ReadValue<Vector2>();
-            if (PlayerControls.World.PanMap.IsPressed())
+            var panMapVector = playerControls.World.PanMap.ReadValue<Vector2>();
+            if (playerControls.World.PanMap.IsPressed())
             {
                 var moveSpeed = 10;
                 Camera.main.transform.Translate(moveSpeed * Time.deltaTime * panMapVector);
@@ -153,25 +203,26 @@ namespace Assets.Scripts.World.Controller
             var currentMouseVector = Mouse.current.position.ReadValue();
             var mouseCurrentPosition = Camera.main.ScreenToWorldPoint(new Vector3(currentMouseVector.x, currentMouseVector.y, 0));
 
-            //Check if the screen is being dragged.
-            if (Vector3.Distance(panningMouseStart, mouseCurrentPosition) > panningThreshold * Camera.main.orthographicSize)
-            {
-                isPanning = true;
-            }
-
-            //Handle screen drag.
-            //if (Input.GetMouseButton(0) && isPanning)
-            if (Mouse.current.leftButton.isPressed && isPanning)
-            {
-                Vector3 diff = mouseLastPosition - mouseCurrentPosition;
-                Camera.main.transform.Translate(diff);
-            }
 
             //If the left mouse button isnt down then we arent panning.
-            //if (!Input.GetMouseButton(0))
-            if (Mouse.current.leftButton.isPressed)
+            if (!Mouse.current.leftButton.isPressed)
             {
                 isPanning = false;
+            }
+            else
+            {
+                //Check if the screen is being dragged.
+                if (Vector3.Distance(panningMouseStart, mouseCurrentPosition) > panningThreshold * Camera.main.orthographicSize)
+                {
+                    isPanning = true;
+                }
+
+                //Handle screen drag.
+                if (Mouse.current.leftButton.isPressed && isPanning)
+                {
+                    Vector3 diff = mouseLastPosition - mouseCurrentPosition;
+                    Camera.main.transform.Translate(diff);
+                }
             }
 
             UpdateMouseWorldTilePosition(mouseCurrentPosition, () => { return Mouse.current.position.ReadValue(); });
@@ -185,13 +236,13 @@ namespace Assets.Scripts.World.Controller
 
             var scroll = 0.0f;
             //Mouse Zoom
-            var mouseZoom = PlayerControls.World.MouseZoom.ReadValue<float>();
+            var mouseZoom = playerControls.World.MouseZoom.ReadValue<float>();
             if (mouseZoom != 0)
             {
                 scroll = mouseZoom > 0 ? 0.1f : -0.1f;
             }
             //Trigger Zoom
-            var triggerZoom = PlayerControls.World.TriggerZoom.ReadValue<float>();
+            var triggerZoom = playerControls.World.TriggerZoom.ReadValue<float>();
             if (triggerZoom != 0)
             {
                 scroll = triggerZoom * 0.005f;

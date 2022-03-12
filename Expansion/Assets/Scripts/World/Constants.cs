@@ -9,5 +9,6 @@
 
 
         public const string WORLD_UI_SORTING_LAYER_NAME = "WorldUI";
+        public const int UI_LAYER_ID = 5;
     }
 }

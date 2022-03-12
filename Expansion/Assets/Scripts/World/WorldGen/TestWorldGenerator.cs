@@ -19,11 +19,11 @@ namespace Assets.Scripts.World.WorldGen
                     var newTile = new WorldTile(x, y);
                     if (Random.Range(0, 2) == 0)
                     {
-                        newTile.TerrainInfo = new TerrainInfo(World.Model.Enums.BiomeType.Grassland);
+                        newTile.TerrainInfo = new TileTerrainInfo(World.Model.Enums.BiomeType.Grassland);
                     }
                     else
                     {
-                        newTile.TerrainInfo = new TerrainInfo(World.Model.Enums.BiomeType.BorealForest);
+                        newTile.TerrainInfo = new TileTerrainInfo(World.Model.Enums.BiomeType.BorealForest);
                     }
                     WorldTiles[x, y] = newTile;
                 }

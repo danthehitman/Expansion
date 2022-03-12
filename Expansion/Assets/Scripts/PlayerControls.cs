@@ -89,6 +89,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MouseLeftButtonClick"",
+                    ""type"": ""Button"",
+                    ""id"": ""aaa3e0d9-4ad8-497a-bb0a-4cab6c6f53a1"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -190,6 +199,17 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""action"": ""WakeupController"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""87fb32e0-cdba-48c4-bea7-850605139865"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MouseLeftButtonClick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -205,6 +225,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_World_SelectButton = m_World.FindAction("SelectButton", throwIfNotFound: true);
         m_World_WakeupMouse = m_World.FindAction("WakeupMouse", throwIfNotFound: true);
         m_World_WakeupController = m_World.FindAction("WakeupController", throwIfNotFound: true);
+        m_World_MouseLeftButtonClick = m_World.FindAction("MouseLeftButtonClick", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -271,6 +292,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_World_SelectButton;
     private readonly InputAction m_World_WakeupMouse;
     private readonly InputAction m_World_WakeupController;
+    private readonly InputAction m_World_MouseLeftButtonClick;
     public struct WorldActions
     {
         private @PlayerControls m_Wrapper;
@@ -282,6 +304,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @SelectButton => m_Wrapper.m_World_SelectButton;
         public InputAction @WakeupMouse => m_Wrapper.m_World_WakeupMouse;
         public InputAction @WakeupController => m_Wrapper.m_World_WakeupController;
+        public InputAction @MouseLeftButtonClick => m_Wrapper.m_World_MouseLeftButtonClick;
         public InputActionMap Get() { return m_Wrapper.m_World; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -312,6 +335,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @WakeupController.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupController;
                 @WakeupController.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupController;
                 @WakeupController.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnWakeupController;
+                @MouseLeftButtonClick.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnMouseLeftButtonClick;
+                @MouseLeftButtonClick.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnMouseLeftButtonClick;
+                @MouseLeftButtonClick.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnMouseLeftButtonClick;
             }
             m_Wrapper.m_WorldActionsCallbackInterface = instance;
             if (instance != null)
@@ -337,6 +363,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @WakeupController.started += instance.OnWakeupController;
                 @WakeupController.performed += instance.OnWakeupController;
                 @WakeupController.canceled += instance.OnWakeupController;
+                @MouseLeftButtonClick.started += instance.OnMouseLeftButtonClick;
+                @MouseLeftButtonClick.performed += instance.OnMouseLeftButtonClick;
+                @MouseLeftButtonClick.canceled += instance.OnMouseLeftButtonClick;
             }
         }
     }
@@ -350,5 +379,6 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnSelectButton(InputAction.CallbackContext context);
         void OnWakeupMouse(InputAction.CallbackContext context);
         void OnWakeupController(InputAction.CallbackContext context);
+        void OnMouseLeftButtonClick(InputAction.CallbackContext context);
     }
 }

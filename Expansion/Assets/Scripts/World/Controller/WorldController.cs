@@ -1,12 +1,16 @@
+using Assets.Scripts.Common;
+using Assets.Scripts.Test.Controller;
 using Assets.Scripts.World.Model;
 using Assets.Scripts.World.Model.Tile;
 using Assets.Scripts.World.View;
 using Assets.Scripts.World.WorldGen;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts.World.Controller
 {
-    public class WorldController
+    public class WorldController : ILifecycleEventAware
     {
         //Editor Fields
         public int Key = 1;
@@ -17,23 +21,34 @@ namespace Assets.Scripts.World.Controller
         private HighlightBorderView borderView;
         private System.Random rng;
 
-        private readonly Transform GameTransform;
+        private readonly Transform WorldTransform;
         private InputController InputController;
 
-        public WorldController(Transform gameTransform, InputController inputController, HighlightBorderView borderView)
-        {
-            this.borderView = borderView;
-            //TODO: Make settileviewasworldchild take a view interface that it can use to get the transform.
-            borderView.BorderGameObject.transform.SetParent(gameTransform);
+        private List<ILifecycleEventAware> lifecycleEventAwares = new List<ILifecycleEventAware>();
 
-            GameTransform = gameTransform;
+        public WorldController(Transform worldTransform, InputController inputController)
+        {
+            borderView = new HighlightBorderView();
+            lifecycleEventAwares.Add(borderView);
+
+            //TODO: Make settileviewasworldchild take a view interface that it can use to get the transform.
+            borderView.BorderGameObject.transform.SetParent(worldTransform);
+
+            WorldTransform = worldTransform;
             InputController = inputController;
-            inputController.RegisterOnCursorOverWorldCoordinateChangedCallback(OnCursorOverWorldCoordinateChanged);
+            InputController.RegisterOnCursorOverWorldCoordinateChangedCallback(OnCursorOverWorldCoordinateChanged);
+            InputController.RegisterOnDoubleClickWorldCoordinateCallback(OnDoubleClickWorldCoorinate);
+            lifecycleEventAwares.Add(InputController);
+        }
+
+        public void Awake()
+        {
+            foreach (var aware in lifecycleEventAwares) aware.Awake();
         }
 
         public void Start()
         {
-            borderView.Start();
+            foreach (var aware in lifecycleEventAwares) aware.Start();
 
             rng = new System.Random(Key);
 
@@ -55,9 +70,24 @@ namespace Assets.Scripts.World.Controller
             }
         }
 
+        public void OnEnable()
+        {
+            foreach (var aware in lifecycleEventAwares) aware.OnEnable();
+        }
+
+        public void OnDisable()
+        {
+            foreach (var aware in lifecycleEventAwares) aware.OnDisable();
+        }
+
         public void Update()
         {
-            borderView.Update();
+            foreach (var aware in lifecycleEventAwares) aware.Update();
+        }
+
+        public void OnDestroy()
+        {
+            GameStateController.Instance.World = world;
         }
 
         private WorldTileView CreateWorldTileView(WorldTile tileArg)
@@ -70,12 +100,19 @@ namespace Assets.Scripts.World.Controller
 
         private void SetTileViewAsWorldChild(WorldTileView view)
         {
-            view.TileGameObject.transform.SetParent(GameTransform);
+            view.TileGameObject.transform.SetParent(WorldTransform);
         }
 
         private void OnCursorOverWorldCoordinateChanged(int x, int y)
         {
+            world.ActiveWorldX = x;
+            world.ActiveWorldY = y;
             borderView.SetWorldCoordinates(x, y);
+        }
+
+        private void OnDoubleClickWorldCoorinate()
+        {
+            SceneManager.LoadScene("Test");
         }
     }
 }

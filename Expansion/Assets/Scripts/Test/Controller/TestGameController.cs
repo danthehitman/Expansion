@@ -18,5 +18,10 @@ namespace Assets.Scripts.Test.Controller
         {
 
         }
+
+        private void GenerateLevel()
+        {
+
+        }
     }
 }
