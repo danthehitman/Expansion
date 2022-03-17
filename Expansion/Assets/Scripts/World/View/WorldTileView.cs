@@ -39,10 +39,10 @@ namespace Assets.Scripts.World.View
             switch (value)
             {
                 case BiomeType.BorealForest:
-                    sprite = SpriteManager.Instance.GetSpriteByName(Constants.TILE_BOREAL_FOREST);
+                    sprite = SpriteManager.Instance.GetSpriteByName(Constants.TILE_BOREAL_FOREST_SPRITE);
                     break;
                 case BiomeType.Grassland:
-                    sprite = SpriteManager.Instance.GetSpriteByName(Constants.TILE_GRASSLAND);
+                    sprite = SpriteManager.Instance.GetSpriteByName(Constants.TILE_GRASSLAND_SPRITE);
                     break;
             }
 

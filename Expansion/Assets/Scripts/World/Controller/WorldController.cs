@@ -38,7 +38,6 @@ namespace Assets.Scripts.World.Controller
             InputController = inputController;
             InputController.RegisterOnCursorOverWorldCoordinateChangedCallback(OnCursorOverWorldCoordinateChanged);
             InputController.RegisterOnDoubleClickWorldCoordinateCallback(OnDoubleClickWorldCoorinate);
-            lifecycleEventAwares.Add(InputController);
         }
 
         public void Awake()
@@ -83,6 +82,11 @@ namespace Assets.Scripts.World.Controller
         public void Update()
         {
             foreach (var aware in lifecycleEventAwares) aware.Update();
+        }
+
+        public void FixedUpdate()
+        {
+            foreach (var aware in lifecycleEventAwares) aware.FixedUpdate();
         }
 
         public void OnDestroy()

@@ -57,6 +57,10 @@ namespace Assets.Scripts.World.View
             }
         }
 
+        public void FixedUpdate()
+        {
+        }
+
         public void OnDestroy()
         {
         }

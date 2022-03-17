@@ -17,7 +17,6 @@ namespace Assets.Scripts.World.Controller
     public class InputController : ILifecycleEventAware
     {
         private const float DOUBLE_CLICK_INTERVAL = 0.25f;
-        private PlayerControls playerControls;
         private Vector3 mouseLastPosition;
         private int lastWorldX;
         private int lastWorldY;
@@ -32,13 +31,16 @@ namespace Assets.Scripts.World.Controller
 
         protected Action<int, int> OnCursorOverWorldCoordinateChanged;
         protected Action OnDoubleClickWorldCoordinate;
+        protected Action<Vector2> OnMove;
+
+        public PlayerControls PlayerControls { get; set; }
 
 
         public InputController(Transform uiTransform, PlayerControls playerControls)
         {
             var cursorView = new CursorView(uiTransform);
             cursorTransform = cursorView.GameObject.transform;
-            this.playerControls = playerControls;
+            PlayerControls = playerControls;
         }
 
         public void RegisterOnCursorOverWorldCoordinateChangedCallback(Action<int, int> callback)
@@ -52,6 +54,12 @@ namespace Assets.Scripts.World.Controller
 
         public void UnregisterOnDoubleClickWorldCoordinateCallback(Action callback)
             => OnDoubleClickWorldCoordinate -= callback;
+
+        public void RegisterOnMoveCallback(Action<Vector2> callback)
+            => OnMove += callback;
+
+        public void UnregisterOnMoveCallback(Action<Vector2> callback)
+            => OnMove -= callback;
 
 
         public void Awake()
@@ -85,24 +93,27 @@ namespace Assets.Scripts.World.Controller
             }
 
             InputSystem.onAfterUpdate += HandleOnAfterUpdate;
-            playerControls.World.WakeupController.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
-            playerControls.World.WakeupMouse.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
-            playerControls.World.MouseLeftButtonClick.started += HandleOnMouseLeftButtonClick;
-            playerControls.World.MouseLeftButtonClick.canceled += HandleOnMouseLeftButtonClick;
+            PlayerControls.World.WakeupController.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
+            PlayerControls.World.WakeupMouse.started += (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
+            PlayerControls.World.MouseLeftButtonClick.started += HandleOnMouseLeftButtonClick;
+            PlayerControls.World.MouseLeftButtonClick.canceled += HandleOnMouseLeftButtonClick;
         }
 
         public void OnDisable()
         {
             InputSystem.RemoveDevice(virtualMouse);
             InputSystem.onAfterUpdate -= HandleOnAfterUpdate;
-            playerControls.World.WakeupController.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
-            playerControls.World.WakeupMouse.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
-            playerControls.World.MouseLeftButtonClick.started -= HandleOnMouseLeftButtonClick;
-            playerControls.World.MouseLeftButtonClick.canceled -= HandleOnMouseLeftButtonClick;
+            PlayerControls.World.WakeupController.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Gamepad); };
+            PlayerControls.World.WakeupMouse.started -= (CallbackContext ctx) => { SetActiveInputType(InputType.Mouse); };
+            PlayerControls.World.MouseLeftButtonClick.started -= HandleOnMouseLeftButtonClick;
+            PlayerControls.World.MouseLeftButtonClick.canceled -= HandleOnMouseLeftButtonClick;
         }
 
         // Update is called once per frame
         public void Update()
+        {
+        }
+        public void FixedUpdate()
         {
         }
 
@@ -155,7 +166,7 @@ namespace Assets.Scripts.World.Controller
         {
             if (inputType == InputType.Gamepad) HandleGamepadMouse();
             if (inputType == InputType.Mouse) HandleMouseInput();
-            HandlZoomInput();
+            HandleZoomInput();
         }
 
         private void HandleGamepadMouse()
@@ -163,7 +174,7 @@ namespace Assets.Scripts.World.Controller
             var speed = 1000;
             if (virtualMouse != null && Gamepad.current != null)
             {
-                Vector2 stickValue = playerControls.World.MoveCursor.ReadValue<Vector2>();
+                Vector2 stickValue = PlayerControls.World.MoveCursor.ReadValue<Vector2>();
                 stickValue *= speed * Time.deltaTime;
                 Vector2 currentPosition = virtualMouse.position.ReadValue();
                 Vector2 newPosition = currentPosition + stickValue;
@@ -176,7 +187,7 @@ namespace Assets.Scripts.World.Controller
 
                 //TODO: This probably needs to track the previous state and make sure it doesnt already line up with the button press.
                 virtualMouse.CopyState<MouseState>(out var mouseState);
-                mouseState.WithButton(MouseButton.Left, playerControls.World.SelectButton.IsPressed());
+                mouseState.WithButton(MouseButton.Left, PlayerControls.World.SelectButton.IsPressed());
                 InputState.Change(virtualMouse, mouseState);
 
                 UpdateMouseWorldTilePosition(Camera.main.ScreenToWorldPoint(new Vector3(newPosition.x, newPosition.y, 0)), () => { return newPosition; });
@@ -184,8 +195,8 @@ namespace Assets.Scripts.World.Controller
                 AnchorCursor(newPosition);
             }
 
-            var panMapVector = playerControls.World.PanMap.ReadValue<Vector2>();
-            if (playerControls.World.PanMap.IsPressed())
+            var panMapVector = PlayerControls.World.Move.ReadValue<Vector2>();
+            if (PlayerControls.World.Move.IsPressed())
             {
                 var moveSpeed = 10;
                 Camera.main.transform.Translate(moveSpeed * Time.deltaTime * panMapVector);
@@ -229,20 +240,20 @@ namespace Assets.Scripts.World.Controller
 
         }
 
-        private void HandlZoomInput()
+        private void HandleZoomInput()
         {
             //Zoom in/out
             //Handled here instead of in a callback because we want continuous press in less code.
 
             var scroll = 0.0f;
             //Mouse Zoom
-            var mouseZoom = playerControls.World.MouseZoom.ReadValue<float>();
+            var mouseZoom = PlayerControls.World.MouseZoom.ReadValue<float>();
             if (mouseZoom != 0)
             {
                 scroll = mouseZoom > 0 ? 0.1f : -0.1f;
             }
             //Trigger Zoom
-            var triggerZoom = playerControls.World.TriggerZoom.ReadValue<float>();
+            var triggerZoom = PlayerControls.World.TriggerZoom.ReadValue<float>();
             if (triggerZoom != 0)
             {
                 scroll = triggerZoom * 0.005f;

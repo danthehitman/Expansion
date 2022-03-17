@@ -46,7 +46,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""PanMap"",
+                    ""name"": ""Move"",
                     ""type"": ""Value"",
                     ""id"": ""84a2dc69-30f9-470b-9513-1a1c7212cbf7"",
                     ""expectedControlType"": ""Vector2"",
@@ -119,9 +119,64 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""PanMap"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""9ad08ce3-c904-4c3a-b01a-4498a61d4c8c"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""33302842-d27b-4e90-9ad6-5118d9825d1f"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""67ae3848-be6d-4372-9afe-312014b084c9"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""e02e0fb3-9072-4988-adbc-e04621be8f5e"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""79acf930-f6ec-4d59-955c-9c63ec7a7aab"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
@@ -220,7 +275,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_World = asset.FindActionMap("World", throwIfNotFound: true);
         m_World_MouseZoom = m_World.FindAction("MouseZoom", throwIfNotFound: true);
         m_World_TriggerZoom = m_World.FindAction("TriggerZoom", throwIfNotFound: true);
-        m_World_PanMap = m_World.FindAction("PanMap", throwIfNotFound: true);
+        m_World_Move = m_World.FindAction("Move", throwIfNotFound: true);
         m_World_MoveCursor = m_World.FindAction("MoveCursor", throwIfNotFound: true);
         m_World_SelectButton = m_World.FindAction("SelectButton", throwIfNotFound: true);
         m_World_WakeupMouse = m_World.FindAction("WakeupMouse", throwIfNotFound: true);
@@ -287,7 +342,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private IWorldActions m_WorldActionsCallbackInterface;
     private readonly InputAction m_World_MouseZoom;
     private readonly InputAction m_World_TriggerZoom;
-    private readonly InputAction m_World_PanMap;
+    private readonly InputAction m_World_Move;
     private readonly InputAction m_World_MoveCursor;
     private readonly InputAction m_World_SelectButton;
     private readonly InputAction m_World_WakeupMouse;
@@ -299,7 +354,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public WorldActions(@PlayerControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @MouseZoom => m_Wrapper.m_World_MouseZoom;
         public InputAction @TriggerZoom => m_Wrapper.m_World_TriggerZoom;
-        public InputAction @PanMap => m_Wrapper.m_World_PanMap;
+        public InputAction @Move => m_Wrapper.m_World_Move;
         public InputAction @MoveCursor => m_Wrapper.m_World_MoveCursor;
         public InputAction @SelectButton => m_Wrapper.m_World_SelectButton;
         public InputAction @WakeupMouse => m_Wrapper.m_World_WakeupMouse;
@@ -320,9 +375,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @TriggerZoom.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnTriggerZoom;
                 @TriggerZoom.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnTriggerZoom;
                 @TriggerZoom.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnTriggerZoom;
-                @PanMap.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnPanMap;
-                @PanMap.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnPanMap;
-                @PanMap.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnPanMap;
+                @Move.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnMove;
+                @Move.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnMove;
+                @Move.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnMove;
                 @MoveCursor.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnMoveCursor;
                 @MoveCursor.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnMoveCursor;
                 @MoveCursor.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnMoveCursor;
@@ -348,9 +403,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @TriggerZoom.started += instance.OnTriggerZoom;
                 @TriggerZoom.performed += instance.OnTriggerZoom;
                 @TriggerZoom.canceled += instance.OnTriggerZoom;
-                @PanMap.started += instance.OnPanMap;
-                @PanMap.performed += instance.OnPanMap;
-                @PanMap.canceled += instance.OnPanMap;
+                @Move.started += instance.OnMove;
+                @Move.performed += instance.OnMove;
+                @Move.canceled += instance.OnMove;
                 @MoveCursor.started += instance.OnMoveCursor;
                 @MoveCursor.performed += instance.OnMoveCursor;
                 @MoveCursor.canceled += instance.OnMoveCursor;
@@ -374,7 +429,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     {
         void OnMouseZoom(InputAction.CallbackContext context);
         void OnTriggerZoom(InputAction.CallbackContext context);
-        void OnPanMap(InputAction.CallbackContext context);
+        void OnMove(InputAction.CallbackContext context);
         void OnMoveCursor(InputAction.CallbackContext context);
         void OnSelectButton(InputAction.CallbackContext context);
         void OnWakeupMouse(InputAction.CallbackContext context);
