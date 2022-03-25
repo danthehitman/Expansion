@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Common.Manager;
+﻿using Assets.Scripts.Common;
+using Assets.Scripts.Common.Manager;
 using Assets.Scripts.World.Model.Enums;
 using Assets.Scripts.World.Model.Tile;
 using System.ComponentModel;

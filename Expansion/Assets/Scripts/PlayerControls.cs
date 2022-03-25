@@ -98,6 +98,15 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Jump"",
+                    ""type"": ""Button"",
+                    ""id"": ""a77b385a-b690-44db-945e-2e351705003a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -265,6 +274,28 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                     ""action"": ""MouseLeftButtonClick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f12941c1-e235-4e03-9150-eb719f18e9a2"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1a03847f-4b3a-446b-9410-f98199a860a9"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -281,6 +312,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         m_World_WakeupMouse = m_World.FindAction("WakeupMouse", throwIfNotFound: true);
         m_World_WakeupController = m_World.FindAction("WakeupController", throwIfNotFound: true);
         m_World_MouseLeftButtonClick = m_World.FindAction("MouseLeftButtonClick", throwIfNotFound: true);
+        m_World_Jump = m_World.FindAction("Jump", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -348,6 +380,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
     private readonly InputAction m_World_WakeupMouse;
     private readonly InputAction m_World_WakeupController;
     private readonly InputAction m_World_MouseLeftButtonClick;
+    private readonly InputAction m_World_Jump;
     public struct WorldActions
     {
         private @PlayerControls m_Wrapper;
@@ -360,6 +393,7 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         public InputAction @WakeupMouse => m_Wrapper.m_World_WakeupMouse;
         public InputAction @WakeupController => m_Wrapper.m_World_WakeupController;
         public InputAction @MouseLeftButtonClick => m_Wrapper.m_World_MouseLeftButtonClick;
+        public InputAction @Jump => m_Wrapper.m_World_Jump;
         public InputActionMap Get() { return m_Wrapper.m_World; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -393,6 +427,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @MouseLeftButtonClick.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnMouseLeftButtonClick;
                 @MouseLeftButtonClick.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnMouseLeftButtonClick;
                 @MouseLeftButtonClick.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnMouseLeftButtonClick;
+                @Jump.started -= m_Wrapper.m_WorldActionsCallbackInterface.OnJump;
+                @Jump.performed -= m_Wrapper.m_WorldActionsCallbackInterface.OnJump;
+                @Jump.canceled -= m_Wrapper.m_WorldActionsCallbackInterface.OnJump;
             }
             m_Wrapper.m_WorldActionsCallbackInterface = instance;
             if (instance != null)
@@ -421,6 +458,9 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
                 @MouseLeftButtonClick.started += instance.OnMouseLeftButtonClick;
                 @MouseLeftButtonClick.performed += instance.OnMouseLeftButtonClick;
                 @MouseLeftButtonClick.canceled += instance.OnMouseLeftButtonClick;
+                @Jump.started += instance.OnJump;
+                @Jump.performed += instance.OnJump;
+                @Jump.canceled += instance.OnJump;
             }
         }
     }
@@ -435,5 +475,6 @@ public partial class @PlayerControls : IInputActionCollection2, IDisposable
         void OnWakeupMouse(InputAction.CallbackContext context);
         void OnWakeupController(InputAction.CallbackContext context);
         void OnMouseLeftButtonClick(InputAction.CallbackContext context);
+        void OnJump(InputAction.CallbackContext context);
     }
 }

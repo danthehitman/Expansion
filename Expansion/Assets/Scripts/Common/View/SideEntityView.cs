@@ -1,19 +1,15 @@
 ﻿using Assets.Scripts.Common.Manager;
-using Assets.Scripts.Common.Model;
-using Assets.Scripts.World;
 using UnityEngine;
 
 namespace Assets.Scripts.Common.View
 {
-    public class SidePlayerView : ILifecycleEventAware
+    public class SideEntityView : ILifecycleEventAware
     {
         private GameObject playerGameObject;
-        private PlayerModel playerModel;
 
-        public SidePlayerView(GameObject gameObject, PlayerModel playerModel)
+        public SideEntityView(GameObject gameObject)
         {
             playerGameObject = gameObject;
-            this.playerModel = playerModel;
             var playerSr = playerGameObject.AddComponent<SpriteRenderer>();
             playerSr.sprite = SpriteManager.Instance.GetSpriteByName(Constants.PLAYER_SPRITE);
         }
