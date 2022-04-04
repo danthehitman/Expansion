@@ -8,6 +8,8 @@
         public const string CURSOR_SPRITE = "Cursor";
         public const string BORDER_SPRITE_ROOT = "TempBorder";
 
+        public const string WALK_SPRITE_ROOT = "Walk_";
+
 
         public const string WORLD_UI_SORTING_LAYER_NAME = "WorldUI";
         public const int GROUND_LAYER_ID = 3;

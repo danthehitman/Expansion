@@ -6,12 +6,32 @@ namespace Assets.Scripts.Common.View
     public class SideEntityView : ILifecycleEventAware
     {
         private GameObject playerGameObject;
+        private SpriteRenderer playerSr;
+
+        private Sprite[] walkingSprites;
+        private int walkingSpritesLength = 11;
+        private int lastFrame = 0;
+        private float lastFrameDelta = 0;
+
+        private bool walking = true;
 
         public SideEntityView(GameObject gameObject)
         {
+            walkingSprites = new Sprite[walkingSpritesLength];
+            for (int i = 0; i < walkingSpritesLength; i++)
+            {
+                walkingSprites[i] = SpriteManager.Instance.GetSpriteByName($"{Constants.WALK_SPRITE_ROOT}{i}");
+            }
+
             playerGameObject = gameObject;
-            var playerSr = playerGameObject.AddComponent<SpriteRenderer>();
+            playerSr = playerGameObject.AddComponent<SpriteRenderer>();
             playerSr.sprite = SpriteManager.Instance.GetSpriteByName(Constants.PLAYER_SPRITE);
+        }
+
+        public void HorizontalDirectionChanged(int direction)
+        {
+            if (direction != 0)
+                playerSr.flipX = direction < 0;
         }
 
         public void Awake()
@@ -26,17 +46,23 @@ namespace Assets.Scripts.Common.View
         {
         }
 
-        //public float jumpForce = 20;
-        //public float gravity = -9.81f;
-        //float velocity;
         public void Update()
         {
-            //velocity += gravity * Time.deltaTime;
-            //if (Mouse.current.leftButton.isPressed)
-            //{
-            //    velocity = jumpForce;
-            //}
-            //playerGameObject.transform.Translate(new Vector3(0, velocity, 0) * Time.deltaTime);
+            if (walking)
+            {
+                lastFrameDelta += Time.deltaTime;
+                if (lastFrameDelta > 0.05f)
+                {
+                    lastFrame = lastFrame < (walkingSpritesLength - 1) ? lastFrame + 1 : 0;
+                    playerSr.sprite = walkingSprites[lastFrame];
+                    lastFrameDelta = 0;
+                }
+            }
+            else
+            {
+                //TODO: Store this instead of getting it every time.
+                playerSr.sprite = SpriteManager.Instance.GetSpriteByName(Constants.PLAYER_SPRITE);
+            }
         }
 
         public void FixedUpdate()

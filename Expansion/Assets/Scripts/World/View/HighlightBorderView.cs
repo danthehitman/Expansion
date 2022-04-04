@@ -19,7 +19,7 @@ namespace Assets.Scripts.World.View
             borderSprites = new Sprite[borderSpriteLength];
 
             BorderGameObject = new GameObject();
-            for (int i = 0; i < 18; i++)
+            for (int i = 0; i < borderSpriteLength; i++)
             {
                 borderSprites[i] = SpriteManager.Instance.GetSpriteByName($"{Constants.BORDER_SPRITE_ROOT} ({i})");
             }

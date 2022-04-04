@@ -24,11 +24,11 @@ namespace Assets.Scripts.Test.Controller
             var inputController = new InputController(transform.GetChild(0), playerControls);
             lifecycleEventAwares.Add(inputController);
 
-            var playerController = new EntityController<CircleCollider2D>(transform, inputController);
+            var playerController = new EntityController<BoxCollider2D>(transform, inputController);
             lifecycleEventAwares.Add(playerController);
 
 
-            playerController.CollidedWithBlock += OnPlayerCollidedWithBlock;
+            //playerController.CollidedWithBlock += OnPlayerCollidedWithBlock;
 
             var blockController = new TestSideBlockController(transform, new Vector3(3, 0, 0) + zeroZeroOffset, inputController);
             var blockController1 = new TestSideBlockController(transform, new Vector3(3, 1, 0) + zeroZeroOffset, inputController);

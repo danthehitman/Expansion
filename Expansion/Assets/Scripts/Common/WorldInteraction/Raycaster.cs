@@ -9,19 +9,19 @@ namespace Assets.Scripts.Common.WorldInteraction
     {
 
         private Vector2 raycastDirection;
-        private Vector2[] offsetPoints;
+        private Vector2[] rays;
         private LayerMask layerMask;
         private float raycastLength;
 
-        public Raycaster(Vector2 start, Vector2 end, Vector2 dir, LayerMask mask, Vector2 parallelInset, Vector2 perpendicularInset, float checkLength = 0.0f)
+        public Raycaster(Vector2 rayOne, Vector2 rayTwo, Vector2 dir, LayerMask mask, Vector2 parallelInset, Vector2 perpendicularInset, float checkLength = 0.0f)
         {
             raycastDirection = dir;
             //The offset stuff is about moving the starting point of the raycast inside of the collider to tell unity that we dont want
             //to be able to collide with ourselves.  Without the offset the raycast will collide with the entity.
             //It seems to work fine for me without these.  Not sure why. EDIT: Apparently because I had the correct LayerMask set.
-            offsetPoints = new Vector2[] {
-                start + parallelInset + perpendicularInset,
-                end - parallelInset + perpendicularInset,
+            rays = new Vector2[] {
+                rayOne + parallelInset + perpendicularInset,
+                rayTwo - parallelInset + perpendicularInset,
             };
             //The addLength is to make sure that our starting raycast length is enough to get outside of the collider after the offset.
             raycastLength = perpendicularInset.magnitude + checkLength;
@@ -31,7 +31,7 @@ namespace Assets.Scripts.Common.WorldInteraction
         public float CastForDistance(Vector2 origin, float distance)
         {
             float minDistance = distance;
-            foreach (var offset in offsetPoints)
+            foreach (var offset in rays)
             {
                 RaycastHit2D hit = Raycast(origin + offset, raycastDirection, distance + raycastLength, layerMask);
                 if (hit.collider != null)
@@ -40,15 +40,23 @@ namespace Assets.Scripts.Common.WorldInteraction
             return minDistance;
         }
 
-        public Collider2D CastForHit(Vector2 origin)
+        public RaycastHitInfo CastForHit(Vector2 origin)
         {
-            foreach (var offset in offsetPoints)
+            var hitInfo = new RaycastHitInfo();
+            //foreach (var ray in rays)
+            for (int i = 0; i < rays.Length; i++)
             {
-                RaycastHit2D hit = Raycast(origin + offset, raycastDirection, raycastLength, layerMask);
+                var ray = rays[i];
+                RaycastHit2D hit = Raycast(origin + ray, raycastDirection, raycastLength, layerMask);
                 if (hit.collider != null)
-                    return hit.collider;
+                {
+                    if (i == 0)
+                        hitInfo.ColliderOne = hit.collider;
+                    else if (i == 1)
+                        hitInfo.ColliderTwo = hit.collider;
+                }
             }
-            return null;
+            return hitInfo;
 
         }
 
@@ -81,6 +89,23 @@ namespace Assets.Scripts.Common.WorldInteraction
             Debug.DrawLine(start, start + dir * len, Color.red);
             //return Physics2D.CircleCast(start, 0.5f, dir, len, mask);
             return Physics2D.Raycast(start, dir, len, mask);
+        }
+
+        public class RaycastHitInfo
+        {
+            public Collider2D ColliderOne { get; set; }
+            public Collider2D ColliderTwo { get; set; }
+
+            public bool IsColliding()
+            {
+                return ColliderOne != null || ColliderTwo != null;
+            }
+
+            public Collider2D GetFirstCollider()
+            {
+                return ColliderOne ?? ColliderTwo;
+            }
+
         }
     }
 }
